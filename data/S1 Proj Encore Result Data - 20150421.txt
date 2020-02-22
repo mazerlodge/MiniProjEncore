@@ -1,0 +1,93 @@
+S1 Proj Encore Result Data - 20150421
+
+
+10/20 300 t=1k lim=-1
+	h 8 22.9
+	l 6 6.7 1.8 1.7 1.5 17.3 1.9 1.4 
+	
+15/30 300 t=1k lim=-1
+	h 6 1
+	l 0.2 0.5 0.7 2.0 4.1 1.1 7.6 0.5
+	
+10/20 500 t=1.2k lim=-1
+	h 5 24.9 6 5 
+	l 12.7 6.6 4.7 6.8 1.5 5.5
+	
+15/30 500 t=1.2k lim=-1
+	h 6 7 10 
+	l 2.6 2.0 1.4 5.7 8.2 2.6 0.7
+	
+10/20 500 t=1k lim=-1
+	h 3 4 3 9 24.9 2 4 7
+	l 2.7 3.3  
+	
+15/30 500 t=1k lim=-1
+	h 14.9 5 2 4 3 
+	l 0.4 3 1.1 5.1 2.5
+	
+----
+
+10/20 500 t=1k lim=4  (works out to start bal of 16x size)
+	bal up: 1222 1032 622 528 602 668 652
+	    dn: 154 424 206 
+	
+15/30 500 t=1k lim=4 (works out to start bal of 11x size)
+	bal up: 1105 1286 
+		dn: 32 227 35 11 455 29 20 38
+	
+15/30 720 t=1.44k lim=4 (constructed w/ 16x size and target of 2x start)
+	bal up: 774 855 1332
+		dn: 606 525 33 30 6 642 90
+
+Ed: Q: 4h limit is arbitrary, try w/ 2h & 6h (b/c 22 sec per roll is arbitrary)
+	Answer: See below.
+	
+10/20 500 t=1k lim=2  (works out to start bal of 16x size)
+	bal up: 738 866 712 958 
+	    dn: 2 364 322 484 352 444
+
+10/20 500 t=1k lim=6  (works out to start bal of 16x size)
+	bal up: 958 878 570 882
+	    dn: 18 12 2 186 4 22
+
+15/30 720 t=1.44k lim=2 (constructed w/ 16x size and target of 2x start)
+	bal up: 873 933 1233
+		dn: 345 618 195 207 369 681 369
+
+15/30 720 t=1.44k lim=6 (constructed w/ 16x size and target of 2x start)
+	bal up: 1770 1599 
+		dn: 30 348 399 18 864 3 600 765
+
+----
+Arbitrary combos 
+
+10/20 500 t=750k lim=2  
+	bal up: 560 714 768 640 518 
+	    dn: 244 332 400 264 124
+
+10/20 500 t=750k lim=4  
+	bal up: 858 622 932 760 760 618 874
+	    dn: 346 474 188 
+
+15/30 720 t=1.08k lim=2 (constructed w/ 16x size and target of 1.5x start)
+	bal up: 1011 1158 726 924 
+		dn: 333 24 558 462 129 36
+
+15/30 720 t=1.08k lim=4 (constructed w/ 16x size and target of 1.5x start)
+	bal up: 1137 1230 1281 1332 822 1104 
+		dn: 246 711 36 30
+		
+NOTE: 18x size and target of 1.5x with 4h seems to be about 70% effective.
+		
+----
+	
+compare w/ second point to quad odds
+
+10/20 500 t=750 lim=4 secondpoint=yes 
+	bal up: 502 940 
+	    dn: -14 28 18 6 14 2 24 20
+		
+10/20 960 t=1.44k lim=4 secondpoint=yes (16x combined size and target of 1.5x start) 
+	bal up: 1534 1264 1570 1312 
+	    dn: 6 24 390 426 528 504
+
