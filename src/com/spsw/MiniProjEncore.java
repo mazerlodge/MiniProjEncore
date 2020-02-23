@@ -3,16 +3,17 @@ package com.spsw;
 public class MiniProjEncore {
 	
 	// Validate Point 2 is being managed correctly
+	private ArgParser ap;
 
-	private final int passAmount = 10; // 15
-	private final int oddsAmount = 20; // 30
-	private final int secondsPerRoll = 42; // 22
-	private final boolean isSecondPointEnabled = true;
+	private int passAmount = 10; // 15
+	private int oddsAmount = 20; // 30
+	private int secondsPerRoll = 42; // 22
+	private boolean isSecondPointEnabled = true;
 
-	private final int MAX_HOURS = 4; // -1 for no limit
-	private final int START_BALANCE = 100; // 100
-	private final int START_POCKET = 200; // 710
-	private final int TARGET_BALANCE = 550; // 1215
+	private int MAX_HOURS = 1; // -1 for no limit
+	private int START_BALANCE = 100; // 100
+	private int START_POCKET = 200; // 710
+	private int TARGET_BALANCE = 550; // 1215
 
 	private int hour = 0;
 	private int rollCount = 0;
@@ -22,12 +23,19 @@ public class MiniProjEncore {
 	private int balance = START_BALANCE;
 	private int pocket = START_POCKET;
 
+	private String startupMode = "RUN_SIM"; 
+
 	public static void main(final String[] args) {
 
-		final MiniProjEncore mpe = new MiniProjEncore();
-
-		mpe.doMiniProjEncore();
+		final MiniProjEncore mpe = new MiniProjEncore(args);
+		mpe.go();
 		// mpe.TestQRandom();
+
+	}
+
+	public MiniProjEncore(String[] args) {
+
+		ap = new ArgParser(args);
 
 	}
 
@@ -35,22 +43,92 @@ public class MiniProjEncore {
 
 		final QRandom r = new QRandom();
 
-		final int[] results = new int[6];
+		final int[] results = new int[7];
 
 		for (int idx = 0; idx < results.length; idx++)
 			results[idx] = 0;
 
 		for (int idx = 0; idx < 1000; idx++)
-			results[r.Next(0, 5)]++;
+			results[r.Next(1, 6)]++;
 
 		// print results
 		for (int idx = 0; idx < results.length; idx++)
-			System.out.printf("%d=%d  ", idx, results[idx]);
+			System.out.printf("%d=%d\t", idx, results[idx]);
+
+		System.out.print("\n");
+
+	}
+
+	private boolean parseArgs() {
+		boolean bRval = true; 
+
+		
+		System.out.printf("parseArgs() not yet implemented.\n");
+
+		// -pass, -odds, -sec, -secondPoint {T|F} -hours 
+		// -startbalance -startpocket -target -msglevel -showdefaults
+		/*
+			-pass = pass line amount
+			-odds = odds bet amount (usually 2x pass) 
+			-sec  = seconds per roll (used to determine rolls per hour)
+			-secondPoint = T if second point should be enabled 
+			-hours = hours limit or -1 for unlimited 
+			-startbalance -startpocket = starting amounts on table and in pocket 
+			-target = hitting this amount will stop the sim (combined balance + pocket)
+			-msglevel = messages up to this level will be shown, 10 or 20 (20=detail) 
+			-showdefaults = output the settings w/out consideration of parameters passed in. 
+			-startup = run | dotest 
+
+		*/
+
+		if(ap.isInArgs("-pass", true))
+			this.passAmount = Integer.parseInt(ap.getArgValue("-pass"));
+
+		if(ap.isInArgs("-odds", true))
+			this.oddsAmount = Integer.parseInt(ap.getArgValue("-odds"));
+
+		if(ap.isInArgs("-target", true))
+			this.TARGET_BALANCE = Integer.parseInt(ap.getArgValue("-target"));
+
+		if(ap.isInArgs("-startup", true)) {
+			this.startupMode = ap.getArgValue("-startup");
+			System.out.println("hit startup param"); 
+
+		}
+		return bRval; 
+
+	}
+
+	private void showUsage() { 
+
+		System.out.printf("showUsage() not yet implemented.\n");
+
+		System.out.printf("Options are -pass, -odds -target -startup {run | dotest}.\n");
+
+	}
+
+	public void go() {
+
+		if (!parseArgs()) {
+			showUsage();
+			return;
+		}		
+
+		System.out.printf("In go() w/ startup=%s\n", this.startupMode);
+
+		if(startupMode.equals("dotest")) {
+			for (int x=0; x<10; x++) 
+				this.TestQRandom();
+		}
+		else {
+			this.doMiniProjEncore();
+		}
 
 	}
 
 	public void doMiniProjEncore() {
 		// Goal get Max test runs until point hit or lost
+
 
 		int point = -1;
 		int loopCount = 0;
@@ -66,6 +144,7 @@ public class MiniProjEncore {
 		int sevenElevenCount = 0;
 
 		final QRandom r = new QRandom();
+
 
 		System.out.printf("Startup with pass/odds=%d/%d, balance/pocket=%d/%d, %d rolls per hour\n", passAmount,
 				oddsAmount, balance, pocket, 3600 / secondsPerRoll);
