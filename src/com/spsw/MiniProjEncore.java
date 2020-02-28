@@ -11,9 +11,8 @@ public class MiniProjEncore {
 	private boolean isSecondPointEnabled = true;
 
 	private int MAX_HOURS = 1; // -1 for no limit
-	private int START_BALANCE = 100; // 100
-	private int START_POCKET = 200; // 710
-	private int TARGET_BALANCE = 550; // 1215
+	private int START_BALANCE = 300; // 100
+	private int START_POCKET = 700; // 710
 
 	private int hour = 0;
 	private int rollCount = 0;
@@ -22,6 +21,7 @@ public class MiniProjEncore {
 	private int balanceHigh = -1;
 	private int balance = START_BALANCE;
 	private int pocket = START_POCKET;
+	private int targetBalance = 1130; // 1215
 
 	private String startupMode = "RUN_SIM"; 
 
@@ -63,7 +63,7 @@ public class MiniProjEncore {
 		boolean bRval = true; 
 
 		
-		System.out.printf("parseArgs() not yet implemented.\n");
+		System.out.printf("parseArgs() partially implemented.\n");
 
 		// -pass, -odds, -sec, -secondPoint {T|F} -hours 
 		// -startbalance -startpocket -target -msglevel -showdefaults
@@ -88,13 +88,23 @@ public class MiniProjEncore {
 			this.oddsAmount = Integer.parseInt(ap.getArgValue("-odds"));
 
 		if(ap.isInArgs("-target", true))
-			this.TARGET_BALANCE = Integer.parseInt(ap.getArgValue("-target"));
+			this.targetBalance = Integer.parseInt(ap.getArgValue("-target"));
+
+		if(ap.isInArgs("-startbalance", true))
+			this.balance = Integer.parseInt(ap.getArgValue("-startbalance"));
+
+		if(ap.isInArgs("-startpocket", true))
+			this.pocket = Integer.parseInt(ap.getArgValue("-startpocket"));
+
 
 		if(ap.isInArgs("-startup", true)) {
 			this.startupMode = ap.getArgValue("-startup");
 			System.out.println("hit startup param"); 
 
 		}
+
+		System.out.printf("Start pocket at %d\n", this.pocket);
+
 		return bRval; 
 
 	}
@@ -157,7 +167,7 @@ public class MiniProjEncore {
 
 		}
 
-		while ((balance >= (passAmount + oddsAmount)) && (balance + pocket < TARGET_BALANCE)) {
+		while ((balance >= (passAmount + oddsAmount)) && (balance + pocket < targetBalance)) {
 			hour++;
 
 			if ((MAX_HOURS > -1) && (hour > MAX_HOURS))
@@ -346,8 +356,8 @@ public class MiniProjEncore {
 			}
 
 		} // while balance > 0
-
-		if (balance + pocket >= TARGET_BALANCE)
+		
+		if (balance + pocket >= targetBalance)
 			System.out.printf("\n***HIGH BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n", balance,
 					pocket, (rollCount * secondsPerRoll) / 3600.0);
 
