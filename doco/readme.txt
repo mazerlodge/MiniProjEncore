@@ -9,4 +9,5 @@ Strategy:
 
 Issues:
 	Determine if target is reached before 1h limit does scenario stop? 
-
+	Confirm accurate processing of two points at a time 
+	

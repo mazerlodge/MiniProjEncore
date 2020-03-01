@@ -251,10 +251,27 @@ public class MiniProjEncore {
 					} // if point or 7
 					else {
 						// neither point nor 7, set second point?
+						boolean bComeBetResolved = false;
+
+						// COME bet pays instead of setting second point.
+						if ((t == 7) || (t == 11)) {
+							sevenElevenCount++;
+							adjustBalance(passAmount, t);
+							bComeBetResolved = true;
+							System.out.println("New Code hit 1");
+						}
+	
+						// COME bet looses instead of setting second point.
+						if ((t == 2) || (t == 3) || (t == 12)) {
+							crapCount++;
+							adjustBalance((-1 * passAmount), t);
+							bComeBetResolved = true;
+							System.out.println("New Code hit  2");
+						}						
 
 						// set second point if not already set
 						// and permitted by member variable
-						if ((isSecondPointEnabled) && (point2 == -1)) {
+						if ((isSecondPointEnabled) && (point2 == -1) && !bComeBetResolved) {
 							pointSetCount[point]++;
 							point2 = t;
 						}
@@ -267,6 +284,12 @@ public class MiniProjEncore {
 				if (balance < (passAmount + oddsAmount)) {
 					System.out.printf("\n***LOW BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n",
 							balance, pocket, (rollCount * 22) / 3600.0);
+					break;
+				}
+
+				// If target hit during hour, stop. 
+				if (balance+pocket >= targetBalance) {
+					System.out.printf("\n***TARGET HIT, bal+pocket=%d\n", (balance+pocket));
 					break;
 				}
 

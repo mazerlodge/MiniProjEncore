@@ -12,10 +12,11 @@
 		},
 		{
 			"type": "java",
-			"name": "Debug (Launch)-MiniProjEncore<MiniProjEncore>",
+			"name": "Debug (Launch)-MiniProjEncore 10/20 1k -t 1130",
 			"request": "launch",
 			"mainClass": "com.spsw.MiniProjEncore",
-			"projectName": "MiniProjEncore"
+			"projectName": "MiniProjEncore",
+			"args": "-pass 10 -odds 20 -sec 42 -hours 1 -startbalance 300 -startpocket 700 -target 1130"
 		},
 		{
 			"type": "java",

@@ -1,0 +1,49 @@
+S1 POA - MiniProjEncore
+
+Command Line: 
+java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.MiniProjEncore -pass 10 -odds 20 -sec 42 -hours 1 -startbalance 300 -startpocket 700 -target 1130
+
+==== Activity Log - Prior ====
+20110308 - Initial backup, updated with 2 points.
+20110516 - Backup created. 
+20150416 - Multiple improvements/corrections from previous version.
+
+==== Activity Log - 202002 ====
+
+02/22 (S)
+ 	- Initial code addition to git 
+	- Added framework for args on startup 
+
+02/27 (R) 
+ 	- Added doco folder and updated hard defaults.
+
+02/29 (S) 
+	- Initialized POA file for activity tracking 
+	- Added debug startup args to launch.json file. 
+	- Added bug fix for handing 2nd point come out roll craps/seven 
+
+> In-Progress:
+    - Fleshing out UGE.doAction:player() method (Use case F0)
+        -- Next, workig in case PlayerActionShow, flesh out UGE.doActionShow:player() method 
+
+	- Determine if Odds OFF is handled correctly
+		Scenario: 1st and 2nd points established, 1st is hit.  On come out roll, odds bet on 2nd are OFF, if hit on next roll odds returned, come is paid even money.
+
+> Next: 
+
+
+Strategy: 
+	Target 13% increase over 1 hour at 10/20 w/ start total 1k. 
+
+Issues:
+	Determine if target is reached before 1h limit does scenario stop? 
+	Confirm accurate processing of two points at a time 
+	
+
+
+
+
+> Archived/Postponed/Cancelled Tasks:
+
+
+
