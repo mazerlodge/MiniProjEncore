@@ -5,6 +5,7 @@ public class MiniProjEncore {
 	// Validate Point 2 is being managed correctly
 	private ArgParser ap;
 
+	private int maxMsgLevel = -1;
 	private int passAmount = 10; // 15
 	private int oddsAmount = 20; // 30
 	private int secondsPerRoll = 42; // 22
@@ -19,11 +20,13 @@ public class MiniProjEncore {
 
 	private int balanceLow = 999; // Set to extremes to force init
 	private int balanceHigh = -1;
+
 	private int balance = START_BALANCE;
 	private int pocket = START_POCKET;
 	private int targetBalance = 1130; // 1215
 
 	private String startupMode = "RUN_SIM"; 
+	private String msg = ""; // reusable string for message printing.
 
 	public static void main(final String[] args) {
 
@@ -52,18 +55,17 @@ public class MiniProjEncore {
 			results[r.Next(1, 6)]++;
 
 		// print results
+		msg = "";
 		for (int idx = 0; idx < results.length; idx++)
-			System.out.printf("%d=%d\t", idx, results[idx]);
+			msg += String.format("%d=%d\t", idx, results[idx]);
 
-		System.out.print("\n");
+		msg += "\n";
+		showMsg(msg, 2);
 
 	}
 
 	private boolean parseArgs() {
 		boolean bRval = true; 
-
-		
-		System.out.printf("parseArgs() partially implemented.\n");
 
 		// -pass, -odds, -sec, -secondPoint {T|F} -hours 
 		// -startbalance -startpocket -target -msglevel -showdefaults
@@ -78,6 +80,7 @@ public class MiniProjEncore {
 			-msglevel = messages up to this level will be shown, 10 or 20 (20=detail) 
 			-showdefaults = output the settings w/out consideration of parameters passed in. 
 			-startup = run | dotest 
+			-msglevel = max message level (higher = more detail), default is to show all.
 
 		*/
 
@@ -90,20 +93,20 @@ public class MiniProjEncore {
 		if(ap.isInArgs("-target", true))
 			this.targetBalance = Integer.parseInt(ap.getArgValue("-target"));
 
+		if(ap.isInArgs("-sec", true))
+			this.secondsPerRoll = Integer.parseInt(ap.getArgValue("-sec"));
+
 		if(ap.isInArgs("-startbalance", true))
 			this.balance = Integer.parseInt(ap.getArgValue("-startbalance"));
 
 		if(ap.isInArgs("-startpocket", true))
 			this.pocket = Integer.parseInt(ap.getArgValue("-startpocket"));
 
+		if(ap.isInArgs("-msglevel", true))
+			this.maxMsgLevel = Integer.parseInt(ap.getArgValue("-msglevel"));
 
-		if(ap.isInArgs("-startup", true)) {
+		if(ap.isInArgs("-startup", true)) 
 			this.startupMode = ap.getArgValue("-startup");
-			System.out.println("hit startup param"); 
-
-		}
-
-		System.out.printf("Start pocket at %d\n", this.pocket);
 
 		return bRval; 
 
@@ -111,9 +114,7 @@ public class MiniProjEncore {
 
 	private void showUsage() { 
 
-		System.out.printf("showUsage() not yet implemented.\n");
-
-		System.out.printf("Options are -pass, -odds -target -startup {run | dotest}.\n");
+		showMsg("Options are -pass, -odds -target -startup {run | dotest} -msglevel n.\n", -1);
 
 	}
 
@@ -123,8 +124,6 @@ public class MiniProjEncore {
 			showUsage();
 			return;
 		}		
-
-		System.out.printf("In go() w/ startup=%s\n", this.startupMode);
 
 		if(startupMode.equals("dotest")) {
 			for (int x=0; x<10; x++) 
@@ -155,9 +154,9 @@ public class MiniProjEncore {
 
 		final QRandom r = new QRandom();
 
-
-		System.out.printf("Startup with pass/odds=%d/%d, balance/pocket=%d/%d, %d rolls per hour\n", passAmount,
-				oddsAmount, balance, pocket, 3600 / secondsPerRoll);
+		msg = String.format("Startup with pass/odds=%d/%d, balance/pocket=%d/%d, %d rolls per hour\n", 
+									passAmount,oddsAmount, balance, pocket, 3600 / secondsPerRoll);
+		showMsg(msg,2);									
 
 		for (int idx = 0; idx < 13; idx++) {
 			maxLoops[idx] = 0;
@@ -258,7 +257,6 @@ public class MiniProjEncore {
 							sevenElevenCount++;
 							adjustBalance(passAmount, t);
 							bComeBetResolved = true;
-							System.out.println("New Code hit 1");
 						}
 	
 						// COME bet looses instead of setting second point.
@@ -266,7 +264,6 @@ public class MiniProjEncore {
 							crapCount++;
 							adjustBalance((-1 * passAmount), t);
 							bComeBetResolved = true;
-							System.out.println("New Code hit  2");
 						}						
 
 						// set second point if not already set
@@ -282,76 +279,83 @@ public class MiniProjEncore {
 
 				// If balance is too low, stop for-loop.
 				if (balance < (passAmount + oddsAmount)) {
-					System.out.printf("\n***LOW BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n",
-							balance, pocket, (rollCount * 22) / 3600.0);
+					 msg = String.format("\n***LOW BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n", balance, pocket, (rollCount * 22) / 3600.0);
+					showMsg(msg, 2);
 					break;
 				}
 
 				// If target hit during hour, stop. 
 				if (balance+pocket >= targetBalance) {
-					System.out.printf("\n***TARGET HIT, bal+pocket=%d\n", (balance+pocket));
+					msg = String.format("\n***TARGET HIT, bal+pocket=%d\n", (balance+pocket));
+					showMsg(msg,1);
 					break;
 				}
 
 			} // for x
 
-			// System.out.println("Max Loops at each point (4-6:8-10)");
+			// Max Loops at each point (4-6:8-10)
+			msg = "";
 			for (int idx = 4; idx <= 6; idx++)
-				System.out.print(maxLoops[idx] + "\t");
-
-			System.out.print(" : ");
+				msg += maxLoops[idx] + "\t";
+			msg += " : ";
 
 			for (int idx = 8; idx <= 10; idx++)
-				System.out.print(maxLoops[idx] + "\t");
+				msg += maxLoops[idx] + "\t";
+			msg += "  loop at point.";
 
-			System.out.println("  loop at point.");
+			showMsg(msg, 2);
 
 			// output hits
-			// System.out.println("Hits at each point (4-6:8-10)");
+			// Hits at each point (4-6:8-10)
+			msg = "";
 			for (int idx = 4; idx <= 6; idx++)
-				System.out.print(hitCount[idx] + "\t");
-
-			System.out.print(" : ");
+				msg += hitCount[idx] + "\t";
+			msg += " : ";
 
 			for (int idx = 8; idx <= 10; idx++)
-				System.out.print(hitCount[idx] + "\t");
-
-			System.out.printf("  hits.  FYI, 7/11=%d\n", sevenElevenCount);
+				msg += hitCount[idx] + "\t";
+			msg += String.format("  hits.  FYI, 7/11=%d\n", sevenElevenCount);
+			showMsg(msg, 2); 
 
 			// output misses
-			// System.out.println("Misses at each point (4-6:8-10)");
+			// Misses at each point (4-6:8-10)
+			msg = "";
 			for (int idx = 4; idx <= 6; idx++)
-				System.out.print(missCount[idx] + "\t");
-
-			System.out.print(" : ");
+				msg += missCount[idx] + "\t";
+			msg += " : ";
 
 			for (int idx = 8; idx <= 10; idx++)
-				System.out.print(missCount[idx] + "\t");
+				msg += missCount[idx] + "\t";
+			msg += String.format("  misses. FYI, 2/3/12=%d\n", crapCount);
 
-			System.out.printf("  misses. FYI, 2/3/12=%d\n", crapCount);
+			showMsg(msg, 2);
 
 			// output avg to hit
-			// System.out.println("Avg to hit at each point (4-6:8-10)");
+			//Avg to hit at each point (4-6:8-10)
 			int av = 0;
 			int denom = 0;
+			msg = "";
 			for (int idx = 4; idx <= 6; idx++) {
 				denom = hitCount[idx] + missCount[idx];
 				av = (denom > 0) ? maxLoops[idx] / denom : 0;
-				System.out.print(av + "\t");
+				msg += av + "\t";
 
 			}
-
-			System.out.print(" : ");
+			msg += " : ";
 
 			for (int idx = 8; idx <= 10; idx++) {
 				denom = hitCount[idx] + missCount[idx];
 				av = (denom > 0) ? maxLoops[idx] / denom : 0;
-				System.out.print(av + "\t");
+				msg += av + "\t";
 			}
-			System.out.println("  avg to hit");
+			msg += "  avg to hit";
 
-			System.out.printf("End hour=%d bal/pocket=%d/%d (%d) hi/low bal=%d/%d rollCount=%d\n\n", hour, balance,
-					pocket, balance + pocket, balanceHigh, balanceLow, rollCount);
+			showMsg(msg, 2);
+
+			double elapsedTime = (rollCount * secondsPerRoll)/60.0;
+			msg = String.format("End hour=%d bal/pocket=%d/%d (%d) hi/low bal=%d/%d rollCount=%d time=%3f minutes\n\n", 
+					hour, balance, pocket, balance + pocket, balanceHigh, balanceLow, rollCount, elapsedTime);
+			showMsg(msg, 1);
 
 			// adjust balance and pocket amounts
 			balanceHigh = balance;
@@ -360,19 +364,24 @@ public class MiniProjEncore {
 				final int overage = balance - START_BALANCE;
 				pocket += overage;
 				balance = START_BALANCE;
-				System.out.printf("XFR TO Pocket %d, balance/pocket=%d/%d\n\n", overage, balance, pocket);
+
+				msg = String.format("XFR TO Pocket %d, balance/pocket=%d/%d\n\n", overage, balance, pocket);
+				showMsg(msg, 2);
 			} else {
 
 				final int shortage = START_BALANCE - balance;
 				if (pocket > shortage) {
 					balance += shortage;
 					pocket -= shortage;
-					System.out.printf("XFR From Pocket %d, balance now %d\n", shortage, balance);
+					msg = String.format("XFR From Pocket %d, balance now %d\n", shortage, balance);
+					showMsg(msg, 2);
 
 				} else {
 					balance += pocket;
-					if (pocket != 0)
-						System.out.printf("XFR From Pocket %d, balance now %d\n", pocket, balance);
+					if (pocket != 0) {
+						msg = String.format("XFR From Pocket %d, balance now %d\n", pocket, balance);
+						showMsg(msg, 2);
+					}
 					pocket = 0;
 				}
 
@@ -380,41 +389,46 @@ public class MiniProjEncore {
 
 		} // while balance > 0
 		
-		if (balance + pocket >= targetBalance)
-			System.out.printf("\n***HIGH BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n", balance,
+		if (balance + pocket >= targetBalance) {
+			msg = String.format("\n***HIGH BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n", balance,
 					pocket, (rollCount * secondsPerRoll) / 3600.0);
+			showMsg(msg, 2);
+		}
 
 		// output avg to hit
-		System.out.println("Hit-to-Total % at points (4-6:8-10)");
+		showMsg("Hit-to-Total % at points (4-6:8-10)",2);
 		double htt = 0;
 		int denom = 0;
+		msg = "";
 		for (int idx = 4; idx <= 6; idx++) {
 			denom = hitCount[idx] + missCount[idx];
 			htt = (denom > 0) ? (1.0 * hitCount[idx]) / denom : 0;
-			System.out.printf("%3.2f \t", htt);
+			msg += String.format("%3.2f \t", htt);
 
 		}
-
-		System.out.print(" : ");
+		msg += " : ";
 
 		for (int idx = 8; idx <= 10; idx++) {
 			denom = hitCount[idx] + missCount[idx];
 			htt = (denom > 0) ? (1.0 * hitCount[idx]) / denom : 0;
-			System.out.printf("%3.2f \t", htt);
+			msg += String.format("%3.2f \t", htt);
 		}
-		System.out.println("  hit to total");
+		msg += "  hit to total";
+		showMsg(msg, 2);
 
 		// output point set count
-		System.out.println("Point set count at each point (4-6:8-10)");
+		showMsg("Point set count at each point (4-6:8-10)", 2);
+		msg = "";
 		for (int idx = 4; idx <= 6; idx++)
-			System.out.print(pointSetCount[idx] + "\t");
-
-		System.out.print(" : ");
+			msg += pointSetCount[idx] + "\t";
+		msg += " : ";
 
 		for (int idx = 8; idx <= 10; idx++)
-			System.out.print(pointSetCount[idx] + "\t");
+			msg += pointSetCount[idx] + "\t";
 
-		System.out.printf("  point Ct w/ 7-11=%d 2-3-12=%d\n", sevenElevenCount, crapCount);
+		msg += String.format("  point Ct w/ 7-11=%d 2-3-12=%d\n", sevenElevenCount, crapCount);
+		showMsg(msg, 2);
+
 	} // doMiniProjEncore()
 
 	private void adjustBalance(final int amount, final int point) {
@@ -468,8 +482,10 @@ public class MiniProjEncore {
 			
 			balance += pocketLoanAmount;
 			pocket -= pocketLoanAmount;
-			System.out.printf("Borrowed %d from pocket, new balance/pocket = %d/%d on roll %d\n",
-							  pocketLoanAmount, balance, pocket, rollCount);		
+
+			msg = String.format("Borrowed %d from pocket, new balance/pocket = %d/%d on roll %d\n",
+							  pocketLoanAmount, balance, pocket, rollCount);	
+			showMsg(msg,2);	
 	
 		}
 				
@@ -478,6 +494,13 @@ public class MiniProjEncore {
 		
 		if (balance > balanceHigh)
 			balanceHigh = balance;
+
+	}
+
+	private void showMsg(String msg, int level) { 
+
+		if ((maxMsgLevel == -1) || (level <= maxMsgLevel)) 
+			System.out.println(msg);
 
 	}
 }
