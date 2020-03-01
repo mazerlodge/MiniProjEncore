@@ -10,8 +10,10 @@ public class MiniProjEncore {
 	private int oddsAmount = 20; // 30
 	private int secondsPerRoll = 42; // 22
 	private boolean isSecondPointEnabled = true;
+	private boolean bStopOnTarget = false; 
+	private boolean bRetainBalance = false; 
 
-	private int MAX_HOURS = 1; // -1 for no limit
+	private int DEFAULT_MAX_HOURS = 1; // -1 for no limit
 	private int START_BALANCE = 300; // 100
 	private int START_POCKET = 700; // 710
 
@@ -25,6 +27,9 @@ public class MiniProjEncore {
 	private int balance = START_BALANCE;
 	private int pocket = START_POCKET;
 	private int targetBalance = 1130; // 1215
+	private int startupBankroll = balance + pocket;
+	private int startupTarget = targetBalance;
+	private int maxHours = DEFAULT_MAX_HOURS;
 
 	private String startupMode = "RUN_SIM"; 
 	private String msg = ""; // reusable string for message printing.
@@ -83,6 +88,8 @@ public class MiniProjEncore {
 			-startup = run | dotest 
 			-msglevel = max message level (higher = more detail), default is to show all.
 			-bulkrun = number of times to repeat run (good w/ -msglevel 1)
+			-stopontarget = if present sim run should stop when target is hit, if not run for full hour.
+			-retainbalance = if present sim should use ending bal from previous hour as start balance and target set to percent increase based on original params.
 		*/
 
 		if(ap.isInArgs("-pass", true))
@@ -96,6 +103,9 @@ public class MiniProjEncore {
 
 		if(ap.isInArgs("-sec", true))
 			this.secondsPerRoll = Integer.parseInt(ap.getArgValue("-sec"));
+
+		if(ap.isInArgs("-hours", true))
+			this.maxHours = Integer.parseInt(ap.getArgValue("-hours"));
 
 		if(ap.isInArgs("-startbalance", true))
 			this.balance = Integer.parseInt(ap.getArgValue("-startbalance"));
@@ -112,24 +122,59 @@ public class MiniProjEncore {
 		if(ap.isInArgs("-startup", true)) 
 			this.startupMode = ap.getArgValue("-startup");
 
+		if(ap.isInArgs("-stopontarget", false)) 
+			bStopOnTarget = true;
+
+		if(ap.isInArgs("-retainbalance", false)) 
+			bRetainBalance = true;
+
+		// Preserve key startup values 
+		startupBankroll = balance + pocket;
+		startupTarget = targetBalance;
+	
 		return bRval; 
+
+	}
+
+	private void evalTarget() {
+		// Used when retain balance option is used, calculated between each hour of sim run time. 
+
+		// Temp hold of balance information in case retain balance option is used. 
+		int currBalance = balance;
+		int currPocket = pocket; 
+
+		// Calc original target percentage of bankroll
+		double targetPercent = 1.0 * (startupTarget - startupBankroll) / startupBankroll;
+
+		// If using Retain Balance option, calc new target if bankroll is below original amount.
+		boolean bAdjustTarget = false;
+		if ((currBalance + currPocket) < startupBankroll) 
+			bAdjustTarget = true; 
+
+		if (bRetainBalance && bAdjustTarget) {
+			float newTarget = Math.round((balance + pocket) * (1.0 + targetPercent));
+			targetBalance = Math.round(newTarget);
+
+		}
 
 	}
 
 	private void resetSim() { 
 		// Reset the simulator to startup position. 
-		
+
 		// Get balances back to where they were at the start 
 		parseArgs();
-
+		
 		hour = 0;
 		rollCount = 0;
+		balanceHigh = -1;
+		balanceLow = 9999;
 	
 	}
 
 	private void showUsage() { 
 
-		showMsg("Options are -pass, -odds -target -startup {run | dotest} -msglevel n.\n", -1);
+		showMsg("Options are -pass, -odds -target -startup {run | dotest} -msglevel n  -stopontarget -retainBalance.\n", -1);
 
 	}
 
@@ -147,6 +192,7 @@ public class MiniProjEncore {
 		else {
 			int winRunCount = 0;
 			int loseRunCount = 0;
+			int lowBalanceCount = 0;
 			for (int x=0; x<runCount; x++) {
 				resetSim();
 				this.doMiniProjEncore();
@@ -154,10 +200,12 @@ public class MiniProjEncore {
 					winRunCount++;
 				else
 					loseRunCount++;
+					if (balance < (passAmount + oddsAmount))
+						lowBalanceCount++;
 				
 			}
-			msg = String.format("Run level wins/loses = %d & %d  rat= %f", 
-									winRunCount, loseRunCount, (1.0 * winRunCount/loseRunCount));
+			msg = String.format("Run level wins/loses = %d & %d  low_bal=%d rat= %f", 
+									winRunCount, loseRunCount, lowBalanceCount, (1.0 * winRunCount/runCount));
 			showMsg(msg, 1);
 		}
 
@@ -197,7 +245,7 @@ public class MiniProjEncore {
 		while ((balance >= (passAmount + oddsAmount)) && (balance + pocket < targetBalance)) {
 			hour++;
 
-			if ((MAX_HOURS > -1) && (hour > MAX_HOURS))
+			if ((maxHours > -1) && (hour > maxHours))
 				break;
 
 			// Based on rolls per hour
@@ -307,8 +355,8 @@ public class MiniProjEncore {
 
 				// If balance is too low, stop for-loop.
 				if (balance < (passAmount + oddsAmount)) {
-					 msg = String.format("\n***LOW BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours\n\n", balance, pocket, (rollCount * 22) / 3600.0);
-					showMsg(msg, 2);
+					 msg = String.format("\n***LOW BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours", balance, pocket, (rollCount * 22) / 3600.0);
+					showMsg(msg, 1);
 					break;
 				}
 
@@ -316,7 +364,8 @@ public class MiniProjEncore {
 				if (balance+pocket >= targetBalance) {
 					msg = String.format("\n***TARGET HIT, bal+pocket=%d\n", (balance+pocket));
 					showMsg(msg,2);
-					break;
+					if (bStopOnTarget)
+						break;
 				}
 
 			} // for x
@@ -381,8 +430,8 @@ public class MiniProjEncore {
 			showMsg(msg, 2);
 
 			double elapsedTime = (rollCount * secondsPerRoll)/60.0;
-			msg = String.format("End hour=%d bal/pocket=%d/%d (%d) hi/low bal=%d/%d rollCount=%d time=%3.1f mins", 
-					hour, balance, pocket, balance + pocket, balanceHigh, balanceLow, rollCount, elapsedTime);
+			msg = String.format("End hour=%d bal/pocket=%d/%d (%d) T=%d hi/low bal=%d/%d rollCount=%d time=%3.1f mins", 
+					hour, balance, pocket, balance + pocket, targetBalance, balanceHigh, balanceLow, rollCount, elapsedTime);
 			showMsg(msg, 1);
 
 			// adjust balance and pocket amounts
@@ -414,6 +463,9 @@ public class MiniProjEncore {
 				}
 
 			}
+
+			// evaluate and adjust target for next hour. 
+			evalTarget();
 
 		} // while balance > 0
 		

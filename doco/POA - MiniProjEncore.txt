@@ -21,7 +21,12 @@ java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.
 	- Initialized POA file for activity tracking 
 	- Added debug startup args to launch.json file. 
 	- Added bug fix for handing 2nd point come out roll craps/seven 
-	- Added bulk run.  Stategy outcome success rate about 62% over 1,200 sim runs
+	- Added bulk run and stategy outcome success rate reporting
+	- Corrected bug in success rate reporting, 2-point strategy yielding avg of 38% success rate.
+	- Added command line param to enable/disable stop on target hit vs run full hour 
+	- Added command line prarmeter setting of maxHours, raising to 2h & StopOnTarget=F lowered avg success rate to 28%
+	- Test w/ 2h limit & stop on target = T, avg success rate = 46%
+	- Added retain balance (and target % calc) param and changed T|F params to just 'if param present = true' params 
 
 ==== Activity Log - 202003 ====
 
