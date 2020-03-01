@@ -17,6 +17,7 @@ public class MiniProjEncore {
 
 	private int hour = 0;
 	private int rollCount = 0;
+	private int runCount = 1;
 
 	private int balanceLow = 999; // Set to extremes to force init
 	private int balanceHigh = -1;
@@ -81,7 +82,7 @@ public class MiniProjEncore {
 			-showdefaults = output the settings w/out consideration of parameters passed in. 
 			-startup = run | dotest 
 			-msglevel = max message level (higher = more detail), default is to show all.
-
+			-bulkrun = number of times to repeat run (good w/ -msglevel 1)
 		*/
 
 		if(ap.isInArgs("-pass", true))
@@ -105,11 +106,25 @@ public class MiniProjEncore {
 		if(ap.isInArgs("-msglevel", true))
 			this.maxMsgLevel = Integer.parseInt(ap.getArgValue("-msglevel"));
 
+		if(ap.isInArgs("-bulkrun", true))
+			this.runCount = Integer.parseInt(ap.getArgValue("-bulkrun"));
+
 		if(ap.isInArgs("-startup", true)) 
 			this.startupMode = ap.getArgValue("-startup");
 
 		return bRval; 
 
+	}
+
+	private void resetSim() { 
+		// Reset the simulator to startup position. 
+		
+		// Get balances back to where they were at the start 
+		parseArgs();
+
+		hour = 0;
+		rollCount = 0;
+	
 	}
 
 	private void showUsage() { 
@@ -130,7 +145,20 @@ public class MiniProjEncore {
 				this.TestQRandom();
 		}
 		else {
-			this.doMiniProjEncore();
+			int winRunCount = 0;
+			int loseRunCount = 0;
+			for (int x=0; x<runCount; x++) {
+				resetSim();
+				this.doMiniProjEncore();
+				if ((balance + pocket) > targetBalance)
+					winRunCount++;
+				else
+					loseRunCount++;
+				
+			}
+			msg = String.format("Run level wins/loses = %d & %d  rat= %f", 
+									winRunCount, loseRunCount, (1.0 * winRunCount/loseRunCount));
+			showMsg(msg, 1);
 		}
 
 	}
@@ -287,7 +315,7 @@ public class MiniProjEncore {
 				// If target hit during hour, stop. 
 				if (balance+pocket >= targetBalance) {
 					msg = String.format("\n***TARGET HIT, bal+pocket=%d\n", (balance+pocket));
-					showMsg(msg,1);
+					showMsg(msg,2);
 					break;
 				}
 
@@ -353,7 +381,7 @@ public class MiniProjEncore {
 			showMsg(msg, 2);
 
 			double elapsedTime = (rollCount * secondsPerRoll)/60.0;
-			msg = String.format("End hour=%d bal/pocket=%d/%d (%d) hi/low bal=%d/%d rollCount=%d time=%3f minutes\n\n", 
+			msg = String.format("End hour=%d bal/pocket=%d/%d (%d) hi/low bal=%d/%d rollCount=%d time=%3.1f mins", 
 					hour, balance, pocket, balance + pocket, balanceHigh, balanceLow, rollCount, elapsedTime);
 			showMsg(msg, 1);
 
