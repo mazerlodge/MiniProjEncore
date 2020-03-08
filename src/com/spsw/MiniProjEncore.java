@@ -12,6 +12,7 @@ public class MiniProjEncore {
 	private boolean isSecondPointEnabled = true;
 	private boolean bStopOnTarget = false; 
 	private boolean bRetainBalance = false; 
+	private boolean bTabDelimitedOutput = false; 
 
 	private int DEFAULT_MAX_HOURS = 1; // -1 for no limit
 	private int START_BALANCE = 300; // 100
@@ -89,7 +90,9 @@ public class MiniProjEncore {
 			-msglevel = max message level (higher = more detail), default is to show all.
 			-bulkrun = number of times to repeat run (good w/ -msglevel 1)
 			-stopontarget = if present sim run should stop when target is hit, if not run for full hour.
-			-retainbalance = if present sim should use ending bal from previous hour as start balance and target set to percent increase based on original params.
+			-retainbalance = if present sim should use ending bal from previous hour as start balance 
+							  and set target to percent increase based on original params.
+			-tabdelimited = output should be tab delimited (instead of using equals sign) in summary output row
 		*/
 
 		if(ap.isInArgs("-pass", true))
@@ -127,6 +130,9 @@ public class MiniProjEncore {
 
 		if(ap.isInArgs("-retainbalance", false)) 
 			bRetainBalance = true;
+
+		if(ap.isInArgs("-tabdelimited", false)) 
+			bTabDelimitedOutput = true;
 
 		// Preserve key startup values 
 		startupBankroll = balance + pocket;
@@ -335,7 +341,7 @@ public class MiniProjEncore {
 							bComeBetResolved = true;
 						}
 	
-						// COME bet looses instead of setting second point.
+						// COME bet loses instead of setting second point.
 						if ((t == 2) || (t == 3) || (t == 12)) {
 							crapCount++;
 							adjustBalance((-1 * passAmount), t);
@@ -430,8 +436,12 @@ public class MiniProjEncore {
 			showMsg(msg, 2);
 
 			double elapsedTime = (rollCount * secondsPerRoll)/60.0;
-			msg = String.format("End hour=%d bal/pocket=%d/%d (%d) T=%d hi/low bal=%d/%d rollCount=%d time=%3.1f mins", 
-					hour, balance, pocket, balance + pocket, targetBalance, balanceHigh, balanceLow, rollCount, elapsedTime);
+			String formatLine = "End hour=%d bankroll=%d  Tgt=%d rollCount=%d time=%3.1f mins";
+			if (bTabDelimitedOutput)
+				formatLine = "End hour\t%d\tbankroll\t%d\tTgt\t%d\trollCount\t%d\ttime\t%3.1f\tmins";
+
+			msg = String.format(formatLine, 
+					hour, balance + pocket, targetBalance, rollCount, elapsedTime);
 			showMsg(msg, 1);
 
 			// adjust balance and pocket amounts

@@ -33,6 +33,11 @@ java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.
 03/01 (U) 
 	- Added message level and command line param to limit output (-msglevel=1 means only final summary line)
 
+03/07 (S) 
+	- Cleaned up some comment lines 
+	- Added command line switch for tab delimited output
+	- Collected run stats for various strategies, output summary to readme.txt and captured sample run output.
+
 > In-Progress:
     - Fleshing out UGE.doAction:player() method (Use case F0)
         -- Next, workig in case PlayerActionShow, flesh out UGE.doActionShow:player() method 

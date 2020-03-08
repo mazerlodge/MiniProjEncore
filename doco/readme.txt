@@ -4,10 +4,44 @@ java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.
 
 
 
-Strategy: 
+Goal: 
 	Target 13% increase over 1 hour at 10/20 w/ start total 1k. 
 
+	Strategy 0: 
+		Just observe how often can retain bankroll after 1 hour 
+		Starting bankroll 1k, pass/odds amounts at 10/20.
+		Target 1001, stop on target turned on.
+		42 seconds per roll (85 rolls per hour) 
+		Two points turned on. 
+		Run 1,200 times.
+		Result:
+			38% hit or exceeded retain bankroll target, avg end bankroll was 945 
+
+	Strategy 1: 
+		Starting bankroll 1k, pass/odds amounts at 10/20.
+		Target 1130, stop on target turned on.
+		42 seconds per roll (85 rolls per hour) 
+		Two points turned on. 
+		Run 1,200 times.
+		Result:
+			1h limit 
+				= 38% (462/1200), hit target 1130, avg time was 24min
+			2h limit (w/ retain balance on) 
+				= 25% (258/1014) hit in first hour, avg time was 24 min 
+				= 13% (52/379) entered second hour w/ target of 1130
+				= 8% (33/379) exceeded 1130 tgt in second hour, avg time was 71 min
+				= 22% (87/379) hit or exceeded 1k bankroll at end of second hour, avg time was 82 min
+				= 48% (185/379) hit target in second hour, avg target was 919
+
+		Slowing roll to 84 secs per roll lowers 1h win rate to 25%, and 2h rate goes down to 44% (w/ lower avg tgt)
+			= 19% (444/2073) hit in first hour, avg time was 44min
+			= 29% 259/873 hour 2 rows hit or exceeded 1k bankroll at end of second hour, avg time was 106 min 
+
 Issues:
-	Determine if target is reached before 1h limit does scenario stop? 
-	Confirm accurate processing of two points at a time 
+	X-- Determine if target is reached before 1h limit does scenario stop? 
+		N-- Resolved, added command line param -stopontarget
+
+	/-- Confirm accurate processing of two points at a time 
+		N-- ID'd potentional problem with standing pass/come bet odds off on come out roll.
+
 	
