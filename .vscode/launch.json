@@ -16,7 +16,7 @@
 			"request": "launch",
 			"mainClass": "com.spsw.MiniProjEncore",
 			"projectName": "MiniProjEncore",
-			"args": "-pass 10 -odds 20 -sec 42 -hours 2 -startbalance 300 -startpocket 700 -target 1130 -msglevel 1 -bulkrun 6 -stopontarget -retainbalance -tabdelimited"
+			"args": "-pass 10 -odds 20 -sec 42 -hours 1 -startbalance 300 -startpocket 700 -target 1130 -msglevel 1 -bulkrun 12 -stopontarget -retainbalance -NOaltstrategy -secondpoint"
 		},
 		{
 			"type": "java",

@@ -9,10 +9,11 @@ public class MiniProjEncore {
 	private int passAmount = 10; // 15
 	private int oddsAmount = 20; // 30
 	private int secondsPerRoll = 42; // 22
-	private boolean isSecondPointEnabled = true;
+	private boolean bSecondPointEnabled = false;
 	private boolean bStopOnTarget = false; 
 	private boolean bRetainBalance = false; 
 	private boolean bTabDelimitedOutput = false; 
+	private boolean bUseAltStrategy = false;
 
 	private int DEFAULT_MAX_HOURS = 1; // -1 for no limit
 	private int START_BALANCE = 300; // 100
@@ -80,7 +81,7 @@ public class MiniProjEncore {
 			-pass = pass line amount
 			-odds = odds bet amount (usually 2x pass) 
 			-sec  = seconds per roll (used to determine rolls per hour)
-			-secondPoint = T if second point should be enabled 
+			-secondpoint = if present second point is enabled 
 			-hours = hours limit or -1 for unlimited 
 			-startbalance -startpocket = starting amounts on table and in pocket 
 			-target = hitting this amount will stop the sim (combined balance + pocket)
@@ -93,6 +94,7 @@ public class MiniProjEncore {
 			-retainbalance = if present sim should use ending bal from previous hour as start balance 
 							  and set target to percent increase based on original params.
 			-tabdelimited = output should be tab delimited (instead of using equals sign) in summary output row
+			-altstrategy = use alternative strategy (on 2 and 10, single odds w/ place 6 & 8 for 6 each)
 		*/
 
 		if(ap.isInArgs("-pass", true))
@@ -133,6 +135,12 @@ public class MiniProjEncore {
 
 		if(ap.isInArgs("-tabdelimited", false)) 
 			bTabDelimitedOutput = true;
+
+		if(ap.isInArgs("-altstrategy", false)) 
+			bUseAltStrategy = true;
+
+		if(ap.isInArgs("-secondpoint", false)) 
+			bSecondPointEnabled = true;
 
 		// Preserve key startup values 
 		startupBankroll = balance + pocket;
@@ -227,6 +235,9 @@ public class MiniProjEncore {
 		final int hitCount[] = new int[13];
 		final int missCount[] = new int[13];
 		final int pointSetCount[] = new int[13];
+		int asUsedCount = 0;
+		int asPaidAmount = 0;
+
 
 		int point2 = -1;
 
@@ -250,6 +261,8 @@ public class MiniProjEncore {
 
 		while ((balance >= (passAmount + oddsAmount)) && (balance + pocket < targetBalance)) {
 			hour++;
+			asUsedCount = 0;
+			asPaidAmount = 0;
 
 			if ((maxHours > -1) && (hour > maxHours))
 				break;
@@ -257,9 +270,9 @@ public class MiniProjEncore {
 			// Based on rolls per hour
 			for (int x = 0; x < (3600 / secondsPerRoll); x++) {
 
-				final int d1 = r.Next(1, 6);
-				final int d2 = r.Next(1, 6);
-				final int t = d1 + d2;
+				int d1 = r.Next(1, 6);
+				int d2 = r.Next(1, 6);
+				int t = d1 + d2;
 				loopCount++;
 				rollCount++;
 
@@ -269,6 +282,11 @@ public class MiniProjEncore {
 					if (((t >= 4) && (t <= 6)) || ((t >= 8) && (t <= 10))) {
 						point = t;
 						pointSetCount[point]++;
+
+						if ((bUseAltStrategy) 
+							&& ((point == 4) || (point == 10))) 
+							asUsedCount++;
+
 					}
 
 					if ((t == 7) || (t == 11)) {
@@ -305,6 +323,25 @@ public class MiniProjEncore {
 								point2 = -1;
 
 							}
+
+							// see if alt strategy in use for first point and 6/8 place bets were hit
+							if (bUseAltStrategy 
+								&& ((point==4) || (point==10))
+								&& ((t==6) || (t==8))) {
+									// pays an immediate $7 for every $6 
+									balance += 7;
+									asPaidAmount += 7;
+							}
+
+							// see if alt strategy in use for second point and 6/8 place bets were hit
+							if (bUseAltStrategy 
+								&& ((point2==4) || (point2==10))
+								&& ((t==6) || (t==8))) {
+									// pays an immediate $7 for every $6 
+									balance += 7;
+									asPaidAmount += 7;
+							}
+
 						} else {
 							// t == 7, craps out pass line away.
 							if (point != -1)
@@ -316,12 +353,28 @@ public class MiniProjEncore {
 							// see if point lost
 							if (point != -1) {
 								adjustBalance((-1 * oddsAmount), point);
+
+								// see if alt strategy was in use for first point 
+								if (bUseAltStrategy 
+									&& ((point==4) || (point==10))) {
+										// lose $6 place bet on both 6 & 8 
+										balance -= 12;
+								}
+
 								point = -1;
 							}
 
 							// see if point 2 lost
 							if (point2 != -1) {
 								adjustBalance((-1 * oddsAmount), point2);
+
+								// see if alt strategy was in use for second point 
+								if (bUseAltStrategy 
+									&& ((point2==4) || (point2==10))) {
+										// lose $6 place bet on both 6 & 8 
+										balance -= 12;
+								}
+
 								point2 = -1;
 							}
 
@@ -350,9 +403,14 @@ public class MiniProjEncore {
 
 						// set second point if not already set
 						// and permitted by member variable
-						if ((isSecondPointEnabled) && (point2 == -1) && !bComeBetResolved) {
+						if ((bSecondPointEnabled) && (point2 == -1) && !bComeBetResolved) {
 							pointSetCount[point]++;
 							point2 = t;
+
+							if ((bUseAltStrategy) 
+								&& ((point2 == 4) || (point2 == 10))) 
+								asUsedCount++;
+
 						}
 
 					}
@@ -362,7 +420,7 @@ public class MiniProjEncore {
 				// If balance is too low, stop for-loop.
 				if (balance < (passAmount + oddsAmount)) {
 					 msg = String.format("\n***LOW BALANCE, Walk away with bal/pocket=%d/%d after %2.1f hours", balance, pocket, (rollCount * 22) / 3600.0);
-					showMsg(msg, 1);
+					showMsg(msg, 2);
 					break;
 				}
 
@@ -436,12 +494,34 @@ public class MiniProjEncore {
 			showMsg(msg, 2);
 
 			double elapsedTime = (rollCount * secondsPerRoll)/60.0;
-			String formatLine = "End hour=%d bankroll=%d  Tgt=%d rollCount=%d time=%3.1f mins";
-			if (bTabDelimitedOutput)
-				formatLine = "End hour\t%d\tbankroll\t%d\tTgt\t%d\trollCount\t%d\ttime\t%3.1f\tmins";
+			String formatLine = "End hour=%d bankroll=%d  Tgt=%d rollCount=%d time=%3.1f mins asUsed=%d asPaid=%d";
+			if (bTabDelimitedOutput) {
+				if (bUseAltStrategy) {
+					formatLine = "End hour\t%d\tbankroll\t%d\tTgt\t%d\trollCount\t%d\ttime\t%3.1f\tmins\tasUsed\t%d\tasPaid\t%d";
+					msg = String.format(formatLine, 
+										hour, balance + pocket, targetBalance, rollCount, elapsedTime, 
+										asUsedCount, asPaidAmount);
+				}
+				else {
+					formatLine = "End hour\t%d\tbankroll\t%d\tTgt\t%d\trollCount\t%d\ttime\t%3.1f\tmins";
+					msg = String.format(formatLine, 
+										hour, balance + pocket, targetBalance, rollCount, elapsedTime);
+				}
+			}
+			else {
+				if (bUseAltStrategy) {
+					formatLine = "End hour=%d bankroll=%d  Tgt=%d rollCount=%d time=%3.1f mins asUsed=%d asPaid=%d";
+					msg = String.format(formatLine, 
+										hour, balance + pocket, targetBalance, rollCount, elapsedTime, 
+										asUsedCount, asPaidAmount);
+				}
+				else {
+					formatLine = "End hour=%d bankroll=%d  Tgt=%d rollCount=%d time=%3.1f mins";
+					msg = String.format(formatLine, 
+										hour, balance + pocket, targetBalance, rollCount, elapsedTime);
+				}
 
-			msg = String.format(formatLine, 
-					hour, balance + pocket, targetBalance, rollCount, elapsedTime);
+			}
 			showMsg(msg, 1);
 
 			// adjust balance and pocket amounts
@@ -542,10 +622,21 @@ public class MiniProjEncore {
 
 			case 4:
 			case 10:
-				if (amount > 0)
-					balance += passAmount + oddsAmount * 2;
-				else
-					balance -= passAmount + oddsAmount;
+				if (bUseAltStrategy) {
+					// place bets were used with single odds on point
+					// Win and lose balance adjustments for points is in doMiniProjEncore() 
+					if (amount > 0)
+						balance += passAmount + oddsAmount/2 * 2;
+					else
+						balance -= passAmount + oddsAmount/2;
+
+				}
+				else {
+					if (amount > 0)
+						balance += passAmount + oddsAmount * 2;
+					else
+						balance -= passAmount + oddsAmount;
+				}
 				break;
 
 			case 5:
