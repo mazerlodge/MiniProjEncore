@@ -41,7 +41,12 @@ java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.
 	- Added param to control second point enabled or not 
 	- Ran for multiple strategies, single point 5x odds best result.
 
+03/28 (S) 
+	- Added baseline objects for objectversion.  Errors with java.util.ConcurrentModificationException
+
 > In-Progress:
+	- Continue object version.
+
     - Fleshing out UGE.doAction:player() method (Use case F0)
         -- Next, workig in case PlayerActionShow, flesh out UGE.doActionShow:player() method 
 

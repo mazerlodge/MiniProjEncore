@@ -87,7 +87,7 @@ public class MiniProjEncore {
 			-target = hitting this amount will stop the sim (combined balance + pocket)
 			-msglevel = messages up to this level will be shown, 10 or 20 (20=detail) 
 			-showdefaults = output the settings w/out consideration of parameters passed in. 
-			-startup = run | dotest 
+			-startup = run | dotest | objectversion
 			-msglevel = max message level (higher = more detail), default is to show all.
 			-bulkrun = number of times to repeat run (good w/ -msglevel 1)
 			-stopontarget = if present sim run should stop when target is hit, if not run for full hour.
@@ -188,7 +188,7 @@ public class MiniProjEncore {
 
 	private void showUsage() { 
 
-		showMsg("Options are -pass, -odds -target -startup {run | dotest} -msglevel n  -stopontarget -retainBalance.\n", -1);
+		showMsg("Options are -pass, -odds -target -startup {run | dotest | objectversion} -msglevel n  -stopontarget -retainBalance.\n", -1);
 
 	}
 
@@ -204,24 +204,38 @@ public class MiniProjEncore {
 				this.TestQRandom();
 		}
 		else {
-			int winRunCount = 0;
-			int loseRunCount = 0;
-			int lowBalanceCount = 0;
-			for (int x=0; x<runCount; x++) {
-				resetSim();
-				this.doMiniProjEncore();
-				if ((balance + pocket) > targetBalance)
-					winRunCount++;
-				else
-					loseRunCount++;
-					if (balance < (passAmount + oddsAmount))
-						lowBalanceCount++;
-				
+			if (startupMode.equals("objectversion")) {
+				doObjectVersion();
+
 			}
-			msg = String.format("Run level wins/loses = %d & %d  low_bal=%d rat= %f", 
-									winRunCount, loseRunCount, lowBalanceCount, (1.0 * winRunCount/runCount));
-			showMsg(msg, 1);
+			else {
+				int winRunCount = 0;
+				int loseRunCount = 0;
+				int lowBalanceCount = 0;
+				for (int x=0; x<runCount; x++) {
+					resetSim();
+					this.doMiniProjEncore();
+					if ((balance + pocket) > targetBalance)
+						winRunCount++;
+					else
+						loseRunCount++;
+						if (balance < (passAmount + oddsAmount))
+							lowBalanceCount++;
+					
+				}
+				msg = String.format("Run level wins/loses = %d & %d  low_bal=%d rat= %f", 
+										winRunCount, loseRunCount, lowBalanceCount, (1.0 * winRunCount/runCount));
+				showMsg(msg, 1);
+			
+			}
 		}
+
+	}
+
+	private void doObjectVersion() {
+
+		Game theGame = new Game(ap); 
+		theGame.go();
 
 	}
 

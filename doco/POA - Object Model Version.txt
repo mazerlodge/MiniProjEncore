@@ -1,0 +1,35 @@
+POA - Object Model Version 
+
+Use cases 
+----------
+- Place bet
+- Roll and determine outcome 
+- Add Odds 
+- Determine next action (e.g. add Odds, place bet, walk away)
+
+
+Game States 
+------------
+Come Out Roll 
+Point Established 
+Roll at Point 
+
+
+
+Objects
+--------
+Game
+	bets (mutable array) 
+	button (on | off) 
+	player 
+
+Bet 
+	amount 
+	onPoint 
+	oddsAmount 
+	ownerID
+
+Player 
+	ID 
+	bankroll
+
