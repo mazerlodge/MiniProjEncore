@@ -70,9 +70,6 @@ public class Game {
 
 			// If the player has less than the target number of points, place a bet. 
 			if (bets.size() < thePlayer.targetPoints) {
-
-				showMsg("Adding a bet", 1);
-
 				BetType betType = BetType.Pass;
 				if (gameState == GameState.RollAtPoint)
 					betType = BetType.Come;
@@ -97,9 +94,7 @@ public class Game {
 						if ((aBet.type == BetType.Pass) || (aBet.type == BetType.Come)) {
 							// Payoff owning player 
 							aBet.payWinner(thePlayer);
-
-							// Dispose of bet 
-							bets.remove(aBet);
+							aBet.bDeleteEligible = true;
 
 						}  // type = Pass || Come 
 
@@ -111,8 +106,8 @@ public class Game {
 					// Pass and come bets loose b/c come out roll
 					for(Bet aBet : bets) {
 						if ((aBet.type == BetType.Pass) || (aBet.type == BetType.Come)) {
-							// Dispose of bet 
-							bets.remove(aBet);
+							// Note bet to be disposed
+							aBet.bDeleteEligible = true;
 
 						}
 
@@ -147,8 +142,8 @@ public class Game {
 					// Pass and come bets lose 
 					for(Bet aBet : bets) {
 						if ((aBet.type == BetType.Pass) || (aBet.type == BetType.Come)) {
-							// Dispose of bet 
-							bets.remove(aBet);
+							// Note bet to be disposed
+							aBet.bDeleteEligible = true; 
 
 						}  // type = Pass || Come 
 
@@ -165,8 +160,8 @@ public class Game {
 					for(Bet aBet : bets) {
 						if (((aBet.type == BetType.Pass) || (aBet.type == BetType.Come))
 							&& (aBet.onPoint == -1)) {
-							// Dispose of bet 
-							bets.remove(aBet);
+							// Note bet to be disposed
+							aBet.bDeleteEligible = true; 
 
 						}
 
@@ -182,17 +177,17 @@ public class Game {
 							if (aBet.onPoint == -1) {
 							// Establish point
 							aBet.onPoint = t;
-
 							thePlayer.addOdds(20, aBet);
 
 							}
 							else {
 								// Point was hit, pay and dispose 
 								aBet.payWinner(thePlayer);
-								bets.remove(aBet);
+								aBet.bDeleteEligible = true;
 
 							}
 						}
+
 					} // for aBet
 
 					// Set game state and button 
@@ -202,7 +197,16 @@ public class Game {
 
 				} // rollType = point 
 
+			} // if else button
+
+			// Remove bets marked as delete eligible by keeping the others
+			ArrayList<Bet> keepBets = new ArrayList<Bet>(); 
+			for(Bet aBet : bets) {
+				if (!aBet.bDeleteEligible)
+					keepBets.add(aBet); 
 			}
+
+			bets = keepBets;
 
 		} // for rollNumber
 

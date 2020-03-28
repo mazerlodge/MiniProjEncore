@@ -7,6 +7,7 @@ public class Bet {
     public int oddsAmount;
 	public int ownerID;
 	public BetType type;
+	public boolean bDeleteEligible; 
 	
     public Bet(int amount, BetType type, int ownerID) {
 		this.amount = amount; 
@@ -14,6 +15,8 @@ public class Bet {
 		oddsAmount = 0;
 		this.ownerID = ownerID;
 		this.type = type;
+		bDeleteEligible = false; 
+		
 	}
 
 	public void payWinner(Player thePlayer) { 
@@ -46,6 +49,7 @@ public class Bet {
 		} // oddsAmount > 0 
 
 		thePlayer.collectWinnings(payAmount);
+		bDeleteEligible = true;
 
 	}
 	
