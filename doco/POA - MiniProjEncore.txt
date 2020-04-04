@@ -44,8 +44,13 @@ java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.
 03/28 (S) 
 	- Added baseline objects for objectversion.  Errors with java.util.ConcurrentModificationException
 
+04/04 (S) 
+	- Added separate debug block to launch.json focused on Object Version parameters 
+
+
 > In-Progress:
 	- Continue object version.
+		- Break out Game.go() details, m/b to bet objects to allow each to process the roll outcome's impact.
 
     - Fleshing out UGE.doAction:player() method (Use case F0)
         -- Next, workig in case PlayerActionShow, flesh out UGE.doActionShow:player() method 
