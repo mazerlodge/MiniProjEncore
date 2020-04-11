@@ -25,12 +25,6 @@
 			"mainClass": "com.spsw.MiniProjEncore",
 			"projectName": "MiniProjEncore",
 			"args": "-pass 10 -odds 20 -sec 42 -startup objectversion -bankroll 1000 -rollsperhour 80 -targetpoints 2"
-		},
-		{
-			"type": "java",
-			"name": "Debug (Launch)-Fencj",
-			"request": "launch",
-			"mainClass": "com.spsw.Fencj"
 		}
 	]
 }
