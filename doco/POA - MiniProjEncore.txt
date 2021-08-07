@@ -47,6 +47,13 @@ java -cp /Users/mazerlodge/Documents/XProjects/Java/MiniProjEncore/bin com.spsw.
 04/04 (S) 
 	- Added separate debug block to launch.json focused on Object Version parameters 
 
+==== Activity Log - 202108 ====
+
+08/07
+	- Diag logic in Game:Go() under bet evaluation if (!buttonOn) else branch, it is incorrect. 
+	- Correct logic in Game:Go() under bet evaluation if (!buttonOn) else branch, it is incorrect.
+		N-- With button on, roll of 7/11, current Pass and Come bets win, *Point* established bets loose.
+
 
 > In-Progress:
 	- Continue object version.

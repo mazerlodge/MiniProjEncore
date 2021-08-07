@@ -30,11 +30,11 @@ public class Game {
 
 	}
 
-	private boolean parseArgs(ArgParser ap) { 
+	private boolean parseArgs(ArgParser tap) { 
 
 		boolean bRval = true; 
 
-		this.ap = ap;
+		this.ap = tap;
 
 		// Make a Player
 		int balance = 0;
@@ -142,8 +142,17 @@ public class Game {
 					// Pass and come bets lose 
 					for(Bet aBet : bets) {
 						if ((aBet.type == BetType.Pass) || (aBet.type == BetType.Come)) {
-							// Note bet to be disposed
-							aBet.bDeleteEligible = true; 
+							if (aBet.onPoint == -1) {
+								// Newly established pass/come wins on 7/11 
+								// Payoff owning player 
+								aBet.payWinner(thePlayer);
+								aBet.bDeleteEligible = true; // not needed, done inside payWinner() 
+							}
+							else {
+								// Point established bets loose on 7/11
+								// Note bet to be disposed
+								aBet.bDeleteEligible = true; 
+							}
 
 						}  // type = Pass || Come 
 
